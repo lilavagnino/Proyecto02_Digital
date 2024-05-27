@@ -1,0 +1,49 @@
+#include <LiquidCrystal_I2C.h>
+
+#include <Servo.h>
+
+Servo servo1; // Primer servo
+Servo servo2; // Segundo servo
+
+LiquidCrystal_I2C lcd(0x27, 16, 2); // Configura la dirección de la pantalla I2C
+
+void setup() {
+  Serial.begin(9600); // Iniciar comunicación serial
+  servo1.attach(9); // Conectar el primer servo al pin 9
+  servo2.attach(10); // Conectar el segundo servo al pin 10
+  
+  // Inicializa la pantalla LCD
+  lcd.init();
+  lcd.clear();
+  lcd.backlight();
+
+  lcd.setCursor(1, 0);   // Centrar el texto "Graduar" en la línea 0
+  lcd.print(" Somos ");
+  lcd.setCursor(0,1);
+      lcd.print(" Lucia y Diego ");
+  
+  
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    // Leer los valores de los potenciómetros desde el puerto serial
+    String inputString = Serial.readStringUntil('\n');
+    int commaPosition = inputString.indexOf(',');
+    if (commaPosition != -1) {
+      String potValue1String = inputString.substring(0, commaPosition);
+      String potValue2String = inputString.substring(commaPosition + 1);
+      
+      int potValue1 = potValue1String.toInt();
+      int potValue2 = potValue2String.toInt();
+      
+      // Mapear los valores de los potenciómetros al rango de los servos
+      int servoValue1 = map(potValue1, 0, 1023, 0, 180);
+      int servoValue2 = map(potValue2, 0, 1023, 0, 180);
+      
+      // Mover los servos a las posiciones especificadas por los potenciómetros
+      servo1.write(servoValue1);
+      servo2.write(servoValue2);
+    }
+  }
+}
